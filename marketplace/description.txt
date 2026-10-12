@@ -1,0 +1,9 @@
+Sensorline shows your PC's hardware sensors live on Stream Deck keys and Stream Deck + dials. Watch CPU and GPU temperature, load, RAM, fans, power, drives and cooling loops at a glance. Requires AIDA64 Extreme (sold separately, by FinalWire) on Windows.
+
+Pick any sensor AIDA64 shares and show it as a radial gauge, bar, big readout or sparkline, or put up to four sensors on one key. Colour zones (cold, normal, high, critical) blend smoothly. Each zone also has its own symbol and every key shows a trend arrow, so you can read it without relying on colour. A colour-blind safe palette, high-contrast and dark themes, three text sizes and custom colours are included.
+
+One-click keys for CPU temperature, GPU temperature, CPU load, GPU load, RAM usage, fan speed and CPU power find the right sensor for you. Choosing a sensor also fills in sensible limits, which you can change. Formula keys combine up to eight sensors (for example the hottest of CPU and GPU). Alerts can flash the key and play a chime.
+
+If AIDA64 is closed or not sharing, the key shows the steps to fix it. Sensorline reads AIDA64's shared memory, WMI or registry without administrator rights, uses one shared poller, and slows down while AIDA64 is closed.
+
+Supported devices: Stream Deck, Stream Deck MK.2, Stream Deck XL, Stream Deck Mini, Stream Deck Neo, Stream Deck + (dials and touch strip), Stream Deck Mobile and Virtual Stream Deck. Windows 10 or later with Stream Deck 7.1+.

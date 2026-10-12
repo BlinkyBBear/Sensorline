@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sensorline Multi</title>
+    <link rel="stylesheet" href="pi.css" />
+    <script src="sdpi-components.js"></script>
+    <script src="pi.js"></script>
+  </head>
+  <body>
+    <div id="status" class="status" role="status" aria-live="polite">Connecting…</div>
+    <div id="validation" class="validation" role="alert" hidden></div>
+    <sdpi-item label="Count" title="How many sensors to show on the key.">
+      <sdpi-select setting="count"><option value="2">2</option><option value="3">3</option><option value="4">4</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Search" title="Type to filter the sensor lists below by name or AIDA64 ID.">
+      <input id="sensorSearch" class="sensor-search" type="search" placeholder="Filter sensors…" autocomplete="off" />
+    </sdpi-item>
+    <sdpi-item label="Sensor 1" title="Sensor shown in position 1.">
+      <sdpi-select setting="slot0" datasource="getSensors" show-refresh loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 1" title="Short name for sensor 1 (up to 8 characters shown).">
+      <sdpi-textfield setting="slotLabel0" placeholder="Sensor name" maxlength="8"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 2" title="Sensor shown in position 2.">
+      <sdpi-select setting="slot1" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 2" title="Short name for sensor 2 (up to 8 characters shown).">
+      <sdpi-textfield setting="slotLabel1" placeholder="Sensor name" maxlength="8"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 3" title="Sensor shown in position 3.">
+      <sdpi-select setting="slot2" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 3" title="Short name for sensor 3 (up to 8 characters shown).">
+      <sdpi-textfield setting="slotLabel2" placeholder="Sensor name" maxlength="8"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 4" title="Sensor shown in position 4.">
+      <sdpi-select setting="slot3" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 4" title="Short name for sensor 4 (up to 8 characters shown).">
+      <sdpi-textfield setting="slotLabel3" placeholder="Sensor name" maxlength="8"></sdpi-textfield>
+    </sdpi-item>
+    <details open>
+    <summary title="Show or hide display settings">Display</summary>
+    <sdpi-item label="Decimals" title="Digits after the decimal point (0–3).">
+      <sdpi-textfield setting="decimals" type="number" placeholder="0" pattern="-?[0-9]*[.,]?[0-9]*"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Text size" title="Size of the text on this key.">
+      <sdpi-select setting="textSize" default="inherit"><option value="inherit">Use global default</option><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Theme" title="Default, Dark or High contrast.">
+      <sdpi-select setting="theme" default="inherit"><option value="inherit">Use global default</option><option value="default">Default</option><option value="dark">Dark</option><option value="high-contrast">High contrast</option></sdpi-select>
+    </sdpi-item>
+    </details>
+    <details>
+    <summary title="Show or hide colours settings">Colours</summary>
+    <sdpi-item label="Arc colour" title="Zone colours follow the value; Solid uses one colour.">
+      <sdpi-select setting="colorMode"><option value="threshold">Zone colours</option><option value="solid">Solid</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Palette" title="Zone colours. Colour-blind safe uses the Okabe-Ito blue-to-orange set.">
+      <sdpi-select setting="palette" default="inherit" id="palette"><option value="inherit">Use global default</option><option value="default">Default (blue, green, yellow, red)</option><option value="colourblind">Colour-blind safe (blue to orange)</option><option value="custom">Custom</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Gradient" title="Smooth blends between zones; Stepped changes colour at each limit.">
+      <sdpi-select setting="gradient" default="inherit"><option value="inherit">Use global default</option><option value="smooth">Smooth</option><option value="stepped">Stepped</option></sdpi-select>
+    </sdpi-item>
+    <div id="customColours">
+    <sdpi-item label="Cold colour" title="Custom colour for the Cold zone.">
+      <sdpi-color setting="colCold" default="#2f7bff"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Normal colour" title="Custom colour for the Normal zone.">
+      <sdpi-color setting="colNormal" default="#2ecc71"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="High colour" title="Custom colour for the High zone.">
+      <sdpi-color setting="colHigh" default="#f5c400"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Critical colour" title="Custom colour for the Critical zone.">
+      <sdpi-color setting="colCrit" default="#ff3b30"></sdpi-color>
+    </sdpi-item>
+    </div>
+    <sdpi-item label="Background" title="Tint the key with the zone colour, or keep it steady.">
+      <sdpi-select setting="background"><option value="heat">Follows hottest sensor</option><option value="steady">Steady</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Zone symbol" title="Show ▽ ● △ ⚠ so the zone is clear without colour.">
+      <sdpi-checkbox setting="showZoneGlyph" default="true" label=""></sdpi-checkbox>
+    </sdpi-item>
+    </details>
+    <details>
+    <summary title="Show or hide behaviour settings">Behaviour</summary>
+    <sdpi-item label="Interval (ms)" title="How often to read sensors, 250–5000 ms.">
+      <sdpi-textfield setting="intervalMs" type="number" placeholder="1000" pattern="-?[0-9]*[.,]?[0-9]*"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Key press" title="What pressing the key does.">
+      <sdpi-select setting="pressAction" default="refresh"><option value="refresh">Refresh now</option><option value="open-aida64">Open AIDA64</option></sdpi-select>
+    </sdpi-item>
+    </details>
+    <details>
+    <summary title="Show or hide global defaults (all keys) settings">Global defaults (all keys)</summary>
+    <p class="hint">These apply to every key whose option is “Use global default”.</p>
+    <sdpi-item label="Palette" title="Default palette for all keys.">
+      <sdpi-select setting="g_palette" global default="default"><option value="default">Default</option><option value="colourblind">Colour-blind safe</option><option value="custom">Custom</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Gradient" title="Default gradient for all keys.">
+      <sdpi-select setting="g_gradient" global default="smooth"><option value="smooth">Smooth</option><option value="stepped">Stepped</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Theme" title="Default theme for all keys.">
+      <sdpi-select setting="g_theme" global default="default"><option value="default">Default</option><option value="dark">Dark</option><option value="high-contrast">High contrast</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Text size" title="Default text size for all keys.">
+      <sdpi-select setting="g_textSize" global default="medium"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Custom cold" title="Global custom colour (Palette: Custom).">
+      <sdpi-color setting="g_colCold" global default="#2f7bff"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Custom normal" title="Global custom colour (Palette: Custom).">
+      <sdpi-color setting="g_colNormal" global default="#2ecc71"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Custom high" title="Global custom colour (Palette: Custom).">
+      <sdpi-color setting="g_colHigh" global default="#f5c400"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Custom critical" title="Global custom colour (Palette: Custom).">
+      <sdpi-color setting="g_colCrit" global default="#ff3b30"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="AIDA64 path" title="Optional full path to aida64.exe for the Open AIDA64 key press.">
+      <sdpi-textfield setting="g_aidaPath" global placeholder="C:\Program Files (x86)\FinalWire\AIDA64 Extreme\aida64.exe"></sdpi-textfield>
+    </sdpi-item>
+    </details>
+    <details>
+    <summary title="Show or hide import / export settings">Import / export</summary>
+    <sdpi-item label="Settings JSON" title="Copy this key's settings, or paste settings from another key and press Import.">
+      <sdpi-textarea id="settingsJson" rows="4" maxlength="20000"></sdpi-textarea>
+    </sdpi-item>
+    <sdpi-item label="" title="Export fills the box; Import applies it to this key.">
+      <sdpi-button id="exportButton">Export</sdpi-button> <sdpi-button id="importButton">Import</sdpi-button>
+    </sdpi-item>
+    </details>
+    <details>
+    <summary title="How to share sensors from AIDA64">Setup help</summary>
+    <p class="hint">AIDA64 Extreme → File → Preferences → Hardware Monitoring → External Applications → tick “Enable shared memory”, then tick the sensors you want. No administrator rights are needed. WMI and the registry are used automatically if shared memory is off.</p>
+    </details>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+com.rescuecraftstudio.sensorline.sdPlugin/bin/plugin.js
+com.rescuecraftstudio.sensorline.sdPlugin/bin/*.map
+com.rescuecraftstudio.sensorline.sdPlugin/logs/
+.cache/

@@ -1,0 +1,18 @@
+AIDA64
+AIDA64 Extreme
+hardware monitor
+system monitor
+sensors
+CPU temperature
+GPU temperature
+CPU usage
+GPU usage
+RAM usage
+fan speed
+power draw
+NVMe temperature
+water cooling
+PC monitoring
+Windows
+Stream Deck +
+dials
