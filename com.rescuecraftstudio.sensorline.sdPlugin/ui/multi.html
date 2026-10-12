@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sensorline Multi</title>
+    <script src="sdpi-components.js"></script>
+    <script src="pi.js"></script>
+    <style>
+      .sensor-search { width: 100%; box-sizing: border-box; height: 26px; padding: 0 6px; background: #3d3d3d; color: #eee; border: 1px solid #555; border-radius: 3px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <sdpi-item label="Count">
+      <sdpi-select setting="count">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Search">
+      <input id="sensorSearch" class="sensor-search" type="search" placeholder="Filter sensors…" autocomplete="off" />
+    </sdpi-item>
+    <sdpi-item label="Sensor 1">
+      <sdpi-select setting="slot0" datasource="getSensors" show-refresh loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 1">
+      <sdpi-textfield setting="slotLabel0" placeholder="Sensor name"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 2">
+      <sdpi-select setting="slot1" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 2">
+      <sdpi-textfield setting="slotLabel1" placeholder="Sensor name"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 3">
+      <sdpi-select setting="slot2" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 3">
+      <sdpi-textfield setting="slotLabel2" placeholder="Sensor name"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Sensor 4">
+      <sdpi-select setting="slot3" datasource="getSensors" loading="Waiting for sensors…" placeholder="Choose a sensor"></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label 4">
+      <sdpi-textfield setting="slotLabel3" placeholder="Sensor name"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Decimals">
+      <sdpi-textfield setting="decimals" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Interval (ms)">
+      <sdpi-textfield setting="intervalMs" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Background">
+      <sdpi-select setting="background">
+        <option value="heat">Follows hottest sensor</option>
+        <option value="steady">Steady</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Palette">
+      <sdpi-select setting="palette" id="palette" default="default">
+        <option value="default">Default (blue, green, yellow, red)</option>
+        <option value="colourblind">Colour-blind safe (blue to orange)</option>
+        <option value="custom">Custom</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Gradient">
+      <sdpi-select setting="gradient" default="smooth">
+        <option value="smooth">Smooth</option>
+        <option value="stepped">Stepped</option>
+      </sdpi-select>
+    </sdpi-item>
+    <div id="customColours">
+      <sdpi-item label="Cold colour"><sdpi-color setting="colCold" default="#2f7bff"></sdpi-color></sdpi-item>
+      <sdpi-item label="Normal colour"><sdpi-color setting="colNormal" default="#2ecc71"></sdpi-color></sdpi-item>
+      <sdpi-item label="High colour"><sdpi-color setting="colHigh" default="#f5c400"></sdpi-color></sdpi-item>
+      <sdpi-item label="Critical colour"><sdpi-color setting="colCrit" default="#ff3b30"></sdpi-color></sdpi-item>
+    </div>
+  </body>
+</html>

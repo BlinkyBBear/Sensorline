@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sensorline Gauge</title>
+    <script src="sdpi-components.js"></script>
+    <script src="pi.js"></script>
+    <style>
+      .sensor-search { width: 100%; box-sizing: border-box; height: 26px; padding: 0 6px; background: #3d3d3d; color: #eee; border: 1px solid #555; border-radius: 3px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <sdpi-item label="Search">
+      <input id="sensorSearch" class="sensor-search" type="search" placeholder="Filter sensors…" autocomplete="off" />
+    </sdpi-item>
+    <sdpi-item label="Sensor">
+      <sdpi-select
+        setting="sensorKey"
+        datasource="getSensors"
+        show-refresh
+        loading="Waiting for sensors…"
+        placeholder="Choose a sensor"
+      ></sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Style">
+      <sdpi-select setting="style" placeholder="Radial gauge">
+        <option value="radial">Radial gauge</option>
+        <option value="bar">Bar</option>
+        <option value="value">Value</option>
+        <option value="sparkline">Sparkline</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label">
+      <sdpi-textfield setting="label" placeholder="Sensor name"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Unit">
+      <sdpi-textfield setting="unit" placeholder="Auto"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Minimum">
+      <sdpi-textfield setting="min" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Maximum">
+      <sdpi-textfield setting="max" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Cold below">
+      <sdpi-textfield setting="cold" type="number" placeholder="Minimum"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="High from">
+      <sdpi-textfield setting="warn" type="number" placeholder="None"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Critical from">
+      <sdpi-textfield setting="crit" type="number" placeholder="None"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Decimals">
+      <sdpi-textfield setting="decimals" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Interval (ms)">
+      <sdpi-textfield setting="intervalMs" type="number"></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Arc colour">
+      <sdpi-select setting="colorMode">
+        <option value="threshold">Zone colours</option>
+        <option value="solid">Solid</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Palette">
+      <sdpi-select setting="palette" id="palette" default="default">
+        <option value="default">Default (blue, green, yellow, red)</option>
+        <option value="colourblind">Colour-blind safe (blue to orange)</option>
+        <option value="custom">Custom</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Gradient">
+      <sdpi-select setting="gradient" default="smooth">
+        <option value="smooth">Smooth</option>
+        <option value="stepped">Stepped</option>
+      </sdpi-select>
+    </sdpi-item>
+    <div id="customColours">
+      <sdpi-item label="Cold colour"><sdpi-color setting="colCold" default="#2f7bff"></sdpi-color></sdpi-item>
+      <sdpi-item label="Normal colour"><sdpi-color setting="colNormal" default="#2ecc71"></sdpi-color></sdpi-item>
+      <sdpi-item label="High colour"><sdpi-color setting="colHigh" default="#f5c400"></sdpi-color></sdpi-item>
+      <sdpi-item label="Critical colour"><sdpi-color setting="colCrit" default="#ff3b30"></sdpi-color></sdpi-item>
+    </div>
+    <sdpi-item label="Solid colour">
+      <sdpi-color setting="solid"></sdpi-color>
+    </sdpi-item>
+    <sdpi-item label="Background">
+      <sdpi-select setting="background">
+        <option value="heat">Follows zone colour</option>
+        <option value="steady">Steady</option>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Show label">
+      <sdpi-checkbox setting="showLabel"></sdpi-checkbox>
+    </sdpi-item>
+    <sdpi-item>
+      <details>
+        <summary>Sharing</summary>
+        <p>
+          AIDA64 Extreme → Preferences → Hardware Monitoring → External Applications → enable shared memory.
+          Enable the sensors you want listed. Picking a sensor fills in suggested limits; you can change them.
+          If a high/critical limit is lower than the other, low values are treated as bad (for example pump RPM).
+        </p>
+      </details>
+    </sdpi-item>
+  </body>
+</html>

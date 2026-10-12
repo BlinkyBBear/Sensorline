@@ -1,0 +1,39 @@
+{
+  "name": "sensorline",
+  "version": "1.1.0",
+  "description": "Stream Deck plugin that shows AIDA64 Extreme sensors.",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc",
+    "lint": "tsc && node scripts/check-utf8.mjs",
+    "test": "vitest run",
+    "validate": "streamdeck validate com.rescuecraftstudio.sensorline.sdPlugin",
+    "pack": "npm run build && streamdeck pack com.rescuecraftstudio.sensorline.sdPlugin --output dist --force"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BlinkyBBear/Sensorline.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BlinkyBBear/Sensorline/issues"
+  },
+  "homepage": "https://github.com/BlinkyBBear/Sensorline#readme",
+  "dependencies": {
+    "@elgato/streamdeck": "^3.0.2",
+    "@elgato/utils": "^0.6.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@elgato/cli": "^1.10.2",
+    "@types/node": "^20.19.43",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.7"
+  }
+}
