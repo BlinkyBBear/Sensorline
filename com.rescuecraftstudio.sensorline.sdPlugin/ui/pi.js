@@ -3,6 +3,10 @@
 //    <select> lives in the component's shadowRoot, so we reach into it, hide
 //    options that do not match and hide optgroups left empty.
 // 2. Shows the custom colour pickers only when Palette is "Custom".
+// 3. Status line (phase, active source: shared memory / WMI / registry) and
+//    validation messages sent by the plugin.
+// 4. "Preview warning colours", and settings export / import as JSON.
+//    Settings still save automatically on change (no Save button).
 (function () {
   "use strict";
 
@@ -60,7 +64,77 @@
     custom.hidden = palette.value !== "custom";
   }
 
+  function client() {
+    return window.SDPIComponents && window.SDPIComponents.streamDeckClient;
+  }
+
+  function showStatus(msg) {
+    var node = document.getElementById("status");
+    if (node) {
+      var text;
+      if (msg.phase === "live") text = "Live · " + msg.source + " · " + msg.count + " sensors";
+      else if (msg.phase === "not-running") text = "AIDA64 is not running. Start AIDA64 Extreme." + (msg.slow ? " (checking every 5 s)" : "");
+      else if (msg.phase === "sharing-off") text = "AIDA64 is running but not sharing. Preferences → Hardware Monitoring → External Applications → Enable shared memory.";
+      else text = msg.detail || "No sensor source.";
+      node.textContent = text;
+      node.className = "status " + (msg.phase === "live" ? "live" : "off");
+    }
+    var v = document.getElementById("validation");
+    if (v) {
+      v.textContent = msg.validation || "";
+      v.hidden = !msg.validation;
+    }
+    var f = document.getElementById("formulaResult");
+    if (f) f.textContent = msg.validation ? "" : msg.formula || "";
+  }
+
+  function setValidation(text) {
+    var v = document.getElementById("validation");
+    if (!v) return;
+    v.textContent = text || "";
+    v.hidden = !text;
+  }
+
+  function wireButtons() {
+    var c = client();
+    if (!c) return;
+    var preview = document.getElementById("previewButton");
+    if (preview) preview.addEventListener("click", function () { c.send("sendToPlugin", { event: "preview" }); });
+    var box = document.getElementById("settingsJson");
+    var exp = document.getElementById("exportButton");
+    if (exp && box) {
+      exp.addEventListener("click", function () {
+        c.getSettings().then(function (payload) {
+          box.value = JSON.stringify((payload && payload.settings) || {}, null, 1);
+          setValidation("");
+        });
+      });
+    }
+    var imp = document.getElementById("importButton");
+    if (imp && box) {
+      imp.addEventListener("click", function () {
+        var parsed;
+        try {
+          parsed = JSON.parse(box.value);
+        } catch (e) {
+          setValidation("Import failed: that is not valid JSON.");
+          return;
+        }
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          setValidation("Import failed: expected a JSON object of settings.");
+          return;
+        }
+        Promise.resolve(c.setSettings(parsed)).then(function () { location.reload(); });
+      });
+    }
+    c.sendToPropertyInspector.subscribe(function (ev) {
+      var p = ev && ev.payload;
+      if (p && p.event === "status") showStatus(p);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    wireButtons();
     var box = document.getElementById("sensorSearch");
     if (box) {
       box.addEventListener("input", function () {

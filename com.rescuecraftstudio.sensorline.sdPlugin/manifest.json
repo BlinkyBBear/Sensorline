@@ -2,9 +2,9 @@
   "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
   "UUID": "com.rescuecraftstudio.sensorline",
   "Name": "Sensorline",
-  "Version": "1.1.0.0",
+  "Version": "1.2.0.0",
   "Author": "RescueCraft Studio",
-  "Description": "Display any sensor AIDA64 Extreme is sharing. Sensorline reads the official External Applications interfaces — shared memory, WMI, and the registry — and lists every exported value: temperatures, fans, voltages, current, power, clocks, utilisation, disks, network, motherboard, cooling loops, probes, and custom sensors. Each key is a radial gauge, bar, readout, or sparkline, coloured by cold, normal, high and critical zones with a smooth gradient, a colour-blind safe palette, or your own colours.",
+  "Description": "Show any sensor AIDA64 Extreme shares on Stream Deck keys and Stream Deck + dials. Requires AIDA64 Extreme (sold separately) on Windows.",
   "Icon": "imgs/plugin",
   "Category": "Sensorline",
   "CategoryIcon": "imgs/category",
@@ -33,130 +33,206 @@
   },
   "Actions": [
     {
-      "Name": "CPU",
-      "UUID": "com.rescuecraftstudio.sensorline.cpu",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "CPU utilisation from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
-      "Controllers": [
-        "Keypad"
-      ],
-      "DisableCaching": true,
-      "States": [
-        {
-          "Image": "imgs/actions/gauge-key"
-        }
-      ]
-    },
-    {
-      "Name": "Memory",
-      "UUID": "com.rescuecraftstudio.sensorline.memory",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "Memory utilisation from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
-      "Controllers": [
-        "Keypad"
-      ],
-      "DisableCaching": true,
-      "States": [
-        {
-          "Image": "imgs/actions/gauge-key"
-        }
-      ]
-    },
-    {
-      "Name": "Temperature",
+      "Name": "CPU Temperature",
       "UUID": "com.rescuecraftstudio.sensorline.temperature",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "Hottest matching temperature from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
+      "Icon": "imgs/actions/cpu-temp",
+      "Tooltip": "CPU temperature from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/gauge-key"
+          "Image": "imgs/actions/cpu-temp-key",
+          "ShowTitle": false
         }
       ]
     },
     {
-      "Name": "Fan",
-      "UUID": "com.rescuecraftstudio.sensorline.fan",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "Fan speed from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
+      "Name": "GPU Temperature",
+      "UUID": "com.rescuecraftstudio.sensorline.gpu-temperature",
+      "Icon": "imgs/actions/gpu-temp",
+      "Tooltip": "GPU temperature from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/gauge-key"
+          "Image": "imgs/actions/gpu-temp-key",
+          "ShowTitle": false
         }
       ]
     },
     {
-      "Name": "GPU",
+      "Name": "CPU Load",
+      "UUID": "com.rescuecraftstudio.sensorline.cpu",
+      "Icon": "imgs/actions/cpu-load",
+      "Tooltip": "CPU utilisation from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "DisableCaching": true,
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/actions/cpu-load-key",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "GPU Load",
       "UUID": "com.rescuecraftstudio.sensorline.gpu",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "GPU utilisation from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
+      "Icon": "imgs/actions/gpu-load",
+      "Tooltip": "GPU utilisation from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/gauge-key"
+          "Image": "imgs/actions/gpu-load-key",
+          "ShowTitle": false
         }
       ]
     },
     {
-      "Name": "Power",
+      "Name": "RAM Usage",
+      "UUID": "com.rescuecraftstudio.sensorline.memory",
+      "Icon": "imgs/actions/ram",
+      "Tooltip": "Memory utilisation from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "DisableCaching": true,
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/actions/ram-key",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "Fan Speed",
+      "UUID": "com.rescuecraftstudio.sensorline.fan",
+      "Icon": "imgs/actions/fan",
+      "Tooltip": "Fan speed from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "DisableCaching": true,
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/actions/fan-key",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "CPU Power",
       "UUID": "com.rescuecraftstudio.sensorline.power",
-      "Icon": "imgs/actions/gauge",
-      "Tooltip": "Power draw from AIDA64.",
-      "PropertyInspectorPath": "ui/monitor.html",
+      "Icon": "imgs/actions/power",
+      "Tooltip": "CPU package power from AIDA64, one click.",
+      "PropertyInspectorPath": "ui/preset.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/gauge-key"
+          "Image": "imgs/actions/power-key",
+          "ShowTitle": false
         }
       ]
     },
     {
-      "Name": "Gauge",
+      "Name": "Sensor Gauge",
       "UUID": "com.rescuecraftstudio.sensorline.gauge",
       "Icon": "imgs/actions/gauge",
-      "Tooltip": "One AIDA64 sensor as a radial gauge, bar, readout, or sparkline.",
+      "Tooltip": "Any AIDA64 sensor as a gauge, bar, readout or sparkline.",
       "PropertyInspectorPath": "ui/gauge.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/gauge-key"
+          "Image": "imgs/actions/gauge-key",
+          "ShowTitle": false
         }
       ]
     },
     {
-      "Name": "Multi",
+      "Name": "Multi Sensor",
       "UUID": "com.rescuecraftstudio.sensorline.multi",
       "Icon": "imgs/actions/multi",
-      "Tooltip": "Two to four AIDA64 sensors on a single key.",
+      "Tooltip": "Two to four AIDA64 sensors on one key.",
       "PropertyInspectorPath": "ui/multi.html",
       "Controllers": [
         "Keypad"
       ],
       "DisableCaching": true,
+      "SupportedInMultiActions": false,
       "States": [
         {
-          "Image": "imgs/actions/multi-key"
+          "Image": "imgs/actions/multi-key",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "Formula",
+      "UUID": "com.rescuecraftstudio.sensorline.formula",
+      "Icon": "imgs/actions/formula",
+      "Tooltip": "A value calculated from up to eight sensors.",
+      "PropertyInspectorPath": "ui/formula.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "DisableCaching": true,
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/actions/formula-key",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "Sensor Dial",
+      "UUID": "com.rescuecraftstudio.sensorline.dial",
+      "Icon": "imgs/actions/dial",
+      "Tooltip": "An AIDA64 sensor on the Stream Deck + touch strip.",
+      "PropertyInspectorPath": "ui/dial.html",
+      "Controllers": [
+        "Encoder"
+      ],
+      "DisableCaching": true,
+      "Encoder": {
+        "layout": "layouts/strip.json",
+        "TriggerDescription": {
+          "Rotate": "Next sensor / adjust",
+          "Push": "Reset min/max",
+          "Touch": "Switch view"
+        }
+      },
+      "States": [
+        {
+          "Image": "imgs/actions/gauge-key"
         }
       ]
     }
