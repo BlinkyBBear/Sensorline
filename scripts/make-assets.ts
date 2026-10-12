@@ -7,7 +7,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { COLOURBLIND_ZONES, DEFAULT_ZONES } from "../src/colour.js";
-import { render, renderStrip } from "../src/render.js";
+import { render, renderStrip, type StripView } from "../src/render.js";
 import type { Sensor, Snapshot } from "../src/sensors/types.js";
 import { defaultGauge, defaultMulti, type GaugeSettings, parseGauge, type ResolvedAppearance } from "../src/settings.js";
 import { applyRecommendation } from "../src/settings.js";
@@ -126,16 +126,18 @@ const g2 = canvas("Smooth colour zones — or colour-blind safe", "Cold, normal,
   `${grid(row(DEFAULT_ZONES, "smooth"), 8, 150, 290, 180, 34)}${grid(row(COLOURBLIND_ZONES, "smooth"), 8, 150, 520, 180, 34)}${grid(row(DEFAULT_ZONES, "stepped").map((x, i) => (i % 2 ? x : x)), 8, 150, 750, 180, 34)}
   <text x="150" y="282" font-family="IBM Plex Sans" font-size="26" fill="#b4bcc8">Default · smooth</text><text x="150" y="512" font-family="IBM Plex Sans" font-size="26" fill="#b4bcc8">Colour-blind safe (Okabe-Ito)</text><text x="150" y="742" font-family="IBM Plex Sans" font-size="26" fill="#b4bcc8">Stepped</text>`);
 
-const strip = (id: string, view: "bar" | "value" | "sparkline", page: string, value?: number) => {
+const strip = (id: string, view: StripView, page: string, value?: number) => {
   const sensor = SENSORS.find((x) => x.id === id)!;
   const st = { ...applyRecommendation(sensor, defaultGauge()), holdMinMax: true };
   const v = gaugeView(st, APP, SNAP, { ...rt(value ?? sensor.numeric, "up", wave(sensor.numeric! * 0.9, sensor.numeric! * 0.06)), min: sensor.numeric! * 0.7, max: sensor.numeric! * 1.1 }, sensor, sensor.key);
   v.history = wave(0.55, 0.08);
-  return renderStrip(v, view, page);
+  const other = SENSORS.find((x) => x.id === "TGPU1HOT") ?? sensor;
+  const second = { title: "GPU Hot", valueText: String(Math.round(other.numeric ?? 0)), unit: "°C", fraction: 0.9, color: APP.colours.high, zone: "high" as const };
+  return renderStrip(v, view, page, second);
 };
-const strips = [strip("TCPU", "bar", "1/3"), strip("TGPU1HOT", "value", "2/3"), strip("SCPUUTI", "sparkline", "3/3"), strip("PCPUPKG", "bar", "")];
+const strips = [strip("TCPU", "bar", "1/3"), strip("TCPU", "arc", "2/3"), strip("SCPUUTI", "sparkline", "36 pts"), strip("TCPU", "split", "")];
 const stripTiles = strips.map((svg, i) => `<image href="data:image/png;base64,${png(svg, 400).toString("base64")}" x="${160 + i * 410}" y="420" width="400" height="200"/>`).join("");
-const g3 = canvas("Stream Deck + dials and touch strip", "Rotate to cycle sensors or adjust limits, press to reset min/max, tap to switch view.",
+const g3 = canvas("Stream Deck + dials and touch strip", "Bar, arc, sparkline or split views. Rotate to cycle sensors, adjust limits or the time window.",
   `<rect x="140" y="400" width="1640" height="240" rx="24" fill="#000"/>${stripTiles}${[0, 1, 2, 3].map((i) => `<circle cx="${360 + i * 410}" cy="770" r="70" fill="#22252b" stroke="#3a3f48" stroke-width="6"/>`).join("")}`);
 
 const statusKeys = [

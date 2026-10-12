@@ -150,7 +150,7 @@ export function gaugeView(settings: GaugeSettings, app: ResolvedAppearance, snap
     fraction: fraction(value, min, max),
     color,
     background: flash ? app.colours.crit : backgroundColour(value, zones, app, settings.background),
-    history: style === "sparkline" ? rt.history.map((v) => fraction(v, min, max) ?? 0) : [],
+    history: style === "sparkline" ? rt.history.slice(-36).map((v) => fraction(v, min, max) ?? 0) : [],
     zone,
     trend: app.showTrend && !preview ? rt.trend : null,
     minmax: settings.holdMinMax && !preview ? minmaxText(rt, places) : undefined,

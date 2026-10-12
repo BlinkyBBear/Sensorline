@@ -103,22 +103,43 @@ export interface MultiSettings extends Appearance {
   pressAction: "refresh" | "open-aida64";
 }
 
-export type DialView = "bar" | "value" | "sparkline";
+export type DialView = "bar" | "arc" | "sparkline" | "split" | "value";
+export type DialRotate = "cycle" | "adjust" | "window";
+export type DialAdjust = "warn" | "crit" | "both";
+/** What a dial press, a strip tap or a long touch does. */
+export type DialTrigger = "reset" | "view" | "next" | "refresh" | "open-aida64" | "none";
 
-export interface DialSettings extends Appearance {
-  schema: number;
-  /** Up to 4 sensors to cycle through with the dial. */
+export const DIAL_SLOTS = 8;
+export const WINDOW_MIN = 10;
+export const WINDOW_MAX = 120;
+
+/**
+ * Stream Deck + dial. Everything a Gauge key has (sensor, scale, zones, colours,
+ * alerts, smoothing...) plus the Formula fields and dial controls. The primary
+ * sensor is `sensorId || sensorKey`; `sensors[1..7]` are extra sensors the dial
+ * can cycle through (they use recommended limits plus `offsets`).
+ */
+export interface DialSettings extends FormulaSettings {
+  mode: "sensor" | "formula";
+  /** Cycle list: index 0 is the primary sensor; 1..7 are dial1..dial7. */
   sensors: string[];
   index: number;
   view: DialView;
-  rotateMode: "cycle" | "adjust";
+  /** Primary sensor uses recommended limits (+offset) instead of its own fields. */
+  autoLimits: boolean;
+  rotateMode: DialRotate;
+  adjustTarget: DialAdjust;
   adjustStep: number;
-  /** Per-sensor offsets applied to High/Critical in "adjust" mode. */
+  /** Sparkline window in samples, changed by rotating in "window" mode. */
+  windowSamples: number;
+  windowStep: number;
+  /** Per-sensor offsets for High/Critical on sensors with recommended limits. */
   offsets: Record<string, number>;
-  decimals: number;
-  intervalMs: number;
-  smoothing: number;
-  background: Background;
+  /** Right half of the split view; empty = next sensor in the cycle list. */
+  splitKey: string;
+  dialPress: DialTrigger;
+  tapAction: DialTrigger;
+  holdAction: DialTrigger;
 }
 
 const STYLES = new Set<GaugeStyle>(["radial", "bar", "value", "sparkline"]);
@@ -366,27 +387,44 @@ export function parseMulti(raw: unknown): MultiSettings {
 
 // ---- dial -----------------------------------------------------------------------
 
+const DIAL_VIEWS = new Set(["bar", "arc", "sparkline", "split", "value"]);
+const TRIGGERS = new Set(["reset", "view", "next", "refresh", "open-aida64", "none"]);
+
 export function defaultDial(): DialSettings {
-  return { schema: SCHEMA, sensors: ["", "", "", ""], index: 0, view: "bar", rotateMode: "cycle", adjustStep: 1, offsets: {}, decimals: 0, intervalMs: 1000, smoothing: 1, background: "heat", ...defaultAppearance() };
+  return parseDial({});
 }
 
+/**
+ * Parses dial settings. 1.2 dials before this release stored only dial0..dial3,
+ * view, rotateMode and offsets with recommended limits: such settings (dial0
+ * set, no sensorKey) keep recommended limits via `autoLimits`.
+ */
 export function parseDial(raw: unknown): DialSettings {
-  const d = defaultDial();
   const n = obj(raw);
+  const legacy = !("sensorKey" in n) && !("sensorId" in n) && typeof n.dial0 === "string";
+  const g = parseGauge({ style: "bar", ...n, sensorKey: str(n.sensorKey) || str(n.dial0) });
   const offsets: Record<string, number> = {};
   for (const [k, v] of Object.entries(obj(n.offsets))) if (typeof v === "number" && Number.isFinite(v)) offsets[k] = v;
+  const sensors = [gaugeTarget(g), ...[1, 2, 3, 4, 5, 6, 7].map((i) => str(n[`dial${i}`]).trim())];
+  const oldPress = str(n.dialPress) || (n.pressAction === "open-aida64" ? "open-aida64" : "");
   return {
-    schema: SCHEMA,
-    sensors: [0, 1, 2, 3].map((i) => str(n[`dial${i}`])),
-    index: Math.max(0, Math.min(3, Math.round(num(n.index, 0)))),
-    view: pick(n.view, new Set(["bar", "value", "sparkline"]), d.view),
-    rotateMode: n.rotateMode === "adjust" ? "adjust" : "cycle",
-    adjustStep: Math.max(0.1, Math.min(50, num(n.adjustStep, d.adjustStep))),
+    ...g,
+    expression: str(n.expression, "max(a, b)").slice(0, 200),
+    inputs: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => str(n[`in${i}`])),
+    mode: n.mode === "formula" ? "formula" : "sensor",
+    sensors,
+    index: Math.max(0, Math.min(DIAL_SLOTS - 1, Math.round(num(n.index, 0)))),
+    view: pick(n.view, DIAL_VIEWS, "bar"),
+    autoLimits: bool(n.autoLimits, legacy),
+    rotateMode: pick(n.rotateMode, new Set(["cycle", "adjust", "window"]), "cycle"),
+    adjustTarget: pick(n.adjustTarget, new Set(["warn", "crit", "both"]), "both"),
+    adjustStep: Math.max(0.1, Math.min(50, num(n.adjustStep, 1))),
+    windowSamples: Math.max(WINDOW_MIN, Math.min(WINDOW_MAX, Math.round(num(n.windowSamples, 36)))),
+    windowStep: Math.max(1, Math.min(30, Math.round(num(n.windowStep, 6)))),
     offsets,
-    decimals: decimals(n.decimals, d.decimals),
-    intervalMs: clampInterval(num(n.intervalMs, d.intervalMs)),
-    smoothing: Math.max(1, Math.min(20, Math.round(num(n.smoothing, d.smoothing)))),
-    background: n.background === "steady" ? "steady" : "heat",
-    ...parseAppearance(n),
+    splitKey: str(n.splitKey).trim(),
+    dialPress: pick(oldPress, TRIGGERS, "reset"),
+    tapAction: pick(n.tapAction, TRIGGERS, "view"),
+    holdAction: pick(n.holdAction, TRIGGERS, "open-aida64"),
   };
 }

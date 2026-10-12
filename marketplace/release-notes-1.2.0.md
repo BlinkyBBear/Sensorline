@@ -5,7 +5,7 @@
 - Colour-blind safe palette, custom zone colours, smooth (OKLab) or stepped gradient.
 - High-contrast and dark themes, three text sizes, and global defaults that each key can override.
 - One-click keys: CPU temperature, GPU temperature (new), CPU load, GPU load, RAM usage, fan speed, CPU power.
-- Sensor Dial for Stream Deck +: rotate to cycle sensors or adjust limits, press to reset min/max, tap to switch view.
+- Sensor Dial for Stream Deck +, with every Gauge option: bar, gauge arc, sparkline, two-sensor split or large value on the touch strip. Rotate cycles a sensor list, adjusts a threshold or changes the sparkline window. Press, tap and long touch can be set. Includes a Formula mode and presets.
 - Formula keys: combine up to eight sensors, for example `max(a, b)`.
 - Alerts: flash the key and/or play a short chime when a sensor reaches High or Critical.
 - Smoothing, min/max hold, raw sensor ID entry, key press actions (refresh, next sensor, reset min/max, open AIDA64), settings export/import, "Preview warning colours".

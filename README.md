@@ -11,7 +11,7 @@ radial gauges, bars, readouts, sparklines, or 2–4 sensors per key.
 - **Per-sensor defaults:** picking a sensor fills in sensible limits ([docs/thresholds.md](docs/thresholds.md)); you can override them.
 - **Accessible:** zone symbols (▽ ● △ ⚠) and trend arrows, so colour is never the only cue. Value text is at least 4.5:1 contrast. High-contrast and dark themes, three text sizes.
 - **Help on the key:** setup steps when AIDA64 is closed or not sharing. The inspector shows the active source.
-- **Actions (11):** CPU Temperature, GPU Temperature, CPU Load, GPU Load, RAM Usage, Fan Speed, CPU Power (one-click presets), Sensor Gauge, Multi Sensor, Formula (2–8 sensors, safe parser, no `eval`), Sensor Dial (Stream Deck +).
+- **Actions (11):** CPU Temperature, GPU Temperature, CPU Load, GPU Load, RAM Usage, Fan Speed, CPU Power (one-click presets), Sensor Gauge, Multi Sensor, Formula (2–8 sensors, safe parser, no `eval`), Sensor Dial (Stream Deck +: every Gauge option plus five strip layouts — bar, arc, sparkline, two-sensor split, large value — formula mode, and configurable rotate / press / tap / long-touch).
 - **Power-user options:** global defaults with per-key overrides, smoothing, min/max hold, poll interval, raw sensor ID, key press actions (refresh, next sensor, reset min/max, open AIDA64), settings export/import, alerts (flash, chime), "Preview warning colours".
 - **Efficient:** one shared poller for all keys, a 5 s tier while AIDA64 is closed, auto-recovery when AIDA64 restarts or the bridge fails, no admin rights, and images are only sent when they change.
 

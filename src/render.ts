@@ -219,29 +219,73 @@ export function render(v: KeyView): string {
   }
 }
 
-/** Renders the 200 × 100 Stream Deck + touch-strip canvas for a dial. */
-export function renderStrip(v: KeyView, view: "bar" | "value" | "sparkline", page: string): string {
+export type StripView = "bar" | "arc" | "sparkline" | "split" | "value";
+
+/** One half of the split touch-strip view. */
+export interface StripSide {
+  title: string;
+  valueText: string;
+  unit: string;
+  fraction: number | null;
+  color: string;
+  zone: Zone | null;
+}
+
+function joined(v: { valueText: string; unit: string }): string {
+  const t = split(v.valueText, v.unit);
+  return t.sub ? `${t.main} ${t.sub}` : t.main;
+}
+
+function half(side: StripSide, x0: number, v: KeyView, trend: Trend | null): string {
+  const c = readable(v.theme, v.background);
+  const s = v.scale;
+  const label = joined(side);
+  const w = 84 * (side.fraction ?? 0);
+  const glyph = v.showZoneGlyph ? zoneGlyph(side.zone, x0 + 86, 52, 13, ensureContrast(side.color, v.background, 3), v.background) : "";
+  const arrow = trendArrow(trend, x0 + 86, 72, 11, c.fg);
+  return `${text(side.title, x0 + 8, 16, 13 * s, c.muted, 500, "start")}
+    ${text(label, x0 + 8, 50, (label.length > 6 ? 18 : 22) * s, c.fg, 700, "start")}${glyph}${arrow}
+    <rect x="${x0 + 8}" y="82" width="84" height="8" rx="4" fill="${v.theme.track}"/><rect x="${x0 + 8}" y="82" width="${w.toFixed(1)}" height="8" rx="4" fill="${side.color}"/>`;
+}
+
+/**
+ * Renders the 200 × 100 Stream Deck + touch-strip canvas for a dial. Every
+ * element stays inside 0..200 × 0..100 (the custom layout is one full pixmap).
+ */
+export function renderStrip(v: KeyView, view: StripView, page: string, second?: StripSide): string {
   const c = readable(v.theme, v.background);
   const s = v.scale;
   if (v.style === "status") {
-    const lines = (v.steps ?? [v.message ?? ""]).slice(0, 2).map((l, i) => text(l, 100, 56 + i * 20, 15 * s, c.fg, 500)).join("");
-    return svg(`${text(v.title, 100, 24, 18 * s, c.fg, 700)}${lines}`, v.background, 200, 100);
+    const lines = (v.steps ?? [v.message ?? ""]).slice(0, 3).map((l, i) => text(l, 100, 48 + i * 18, 14 * s, c.fg, 500)).join("");
+    return svg(`${text(v.title, 100, 20, 18 * s, c.fg, 700)}${lines}`, v.background, 200, 100);
   }
-  const t = split(v.valueText, v.unit);
-  const head = `${text(v.title, 12, 18, 15 * s, c.muted, 500, "start")}${page ? text(page, 188, 18, 13 * s, c.muted, 500, "end") : ""}`;
-  const glyph = v.showZoneGlyph ? zoneGlyph(v.zone, 178, 52, 18, ensureContrast(v.color, v.background, 3), v.background) : "";
-  const trend = trendArrow(v.trend, 154, 52, 16, c.fg);
+  if (view === "split") {
+    const left: StripSide = { title: v.title, valueText: v.valueText, unit: v.unit, fraction: v.fraction, color: v.color, zone: v.zone };
+    const right: StripSide = second ?? { title: "Second sensor", valueText: "—", unit: "", fraction: null, color: v.theme.off, zone: null };
+    return svg(`${half(left, 0, v, v.trend)}<rect x="99" y="8" width="2" height="84" fill="${v.theme.track}"/>${half(right, 100, v, null)}`, v.background, 200, 100);
+  }
+  const t = joined(v);
+  const head = `${text(v.title, 12, 16, 14 * s, c.muted, 500, "start")}${page ? text(page, 188, 16, 13 * s, c.muted, 500, "end") : ""}`;
+  const glyph = (x: number, y: number) => (v.showZoneGlyph ? zoneGlyph(v.zone, x, y, 18, ensureContrast(v.color, v.background, 3), v.background) : "");
+  const trend = (x: number, y: number) => trendArrow(v.trend, x, y, 16, c.fg);
+  const minmax = (y: number) => (v.minmax ? text(v.minmax, 12, y, 13 * s, c.muted, 500, "start") : "");
   let body: string;
-  if (view === "sparkline") {
+  if (view === "arc") {
+    const f = v.fraction ?? 0;
+    const track = arc(148, 84, 40, -90, 90);
+    const fill = v.fraction && v.fraction > 0 ? `<path d="${arc(148, 84, 40, -90, -90 + 180 * f)}" fill="none" stroke="${v.color}" stroke-width="${(9 * v.theme.stroke).toFixed(1)}" stroke-linecap="round"/>` : "";
+    body = `<path d="${track}" fill="none" stroke="${v.theme.track}" stroke-width="${(9 * v.theme.stroke).toFixed(1)}" stroke-linecap="round"/>${fill}
+      ${text(t, 12, 48, (t.length > 6 ? 22 : 28) * s, c.fg, 700, "start")}${minmax(84)}${glyph(148, 72)}${trend(92, 84)}`;
+  } else if (view === "sparkline") {
     const pts = v.history.length > 1 ? v.history : [v.fraction ?? 0, v.fraction ?? 0];
     const points = pts.map((p, i) => `${(12 + (i / Math.max(1, pts.length - 1)) * 176).toFixed(1)},${(92 - Math.min(1, Math.max(0, p)) * 26).toFixed(1)}`).join(" ");
-    body = `${text(t.sub ? `${t.main} ${t.sub}` : t.main, 12, 50, 26 * s, c.fg, 700, "start")}<polyline points="${points}" fill="none" stroke="${v.color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    body = `${text(t, 12, 46, 26 * s, c.fg, 700, "start")}<polyline points="${points}" fill="none" stroke="${v.color}" stroke-width="${(3 * v.theme.stroke).toFixed(1)}" stroke-linejoin="round" stroke-linecap="round"/>${glyph(178, 46)}${trend(154, 46)}`;
   } else if (view === "value") {
-    body = `${text(t.sub ? `${t.main} ${t.sub}` : t.main, 12, 58, 36 * s, ensureContrast(v.color === v.theme.neutral ? c.fg : v.color, v.background, MIN_CONTRAST), 700, "start")}${v.minmax ? text(v.minmax, 12, 88, 14 * s, c.muted, 500, "start") : ""}`;
+    body = `${text(t, 12, 56, 36 * s, ensureContrast(v.color === v.theme.neutral ? c.fg : v.color, v.background, MIN_CONTRAST), 700, "start")}${minmax(88)}${glyph(178, 52)}${trend(154, 52)}`;
   } else {
     const w = 176 * (v.fraction ?? 0);
-    body = `${text(t.sub ? `${t.main} ${t.sub}` : t.main, 12, 50, 28 * s, c.fg, 700, "start")}
-      <rect x="12" y="78" width="176" height="12" rx="6" fill="${v.theme.track}"/><rect x="12" y="78" width="${w.toFixed(1)}" height="12" rx="6" fill="${v.color}"/>`;
+    body = `${text(t, 12, 44, 28 * s, c.fg, 700, "start")}${minmax(67)}
+      <rect x="12" y="80" width="176" height="12" rx="6" fill="${v.theme.track}"/><rect x="12" y="80" width="${w.toFixed(1)}" height="12" rx="6" fill="${v.color}"/>${glyph(178, 44)}${trend(154, 44)}`;
   }
-  return svg(`${head}${body}${glyph}${trend}`, v.background, 200, 100);
+  return svg(`${head}${body}`, v.background, 200, 100);
 }

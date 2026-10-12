@@ -9,7 +9,7 @@ export class SensorStats {
   min: number | null = null;
   max: number | null = null;
 
-  constructor(private readonly historyLength = 36) {}
+  constructor(private readonly historyLength = 120) {}
 
   /** Adds a raw sample and returns the smoothed value (moving average over `smoothing` samples). */
   push(raw: number | null, smoothing: number): number | null {

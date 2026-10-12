@@ -216,7 +216,7 @@
       "Name": "Sensor Dial",
       "UUID": "com.rescuecraftstudio.sensorline.dial",
       "Icon": "imgs/actions/dial",
-      "Tooltip": "An AIDA64 sensor on the Stream Deck + touch strip.",
+      "Tooltip": "Any AIDA64 sensor or formula on the Stream Deck + touch strip.",
       "PropertyInspectorPath": "ui/dial.html",
       "Controllers": [
         "Encoder"
@@ -225,9 +225,10 @@
       "Encoder": {
         "layout": "layouts/strip.json",
         "TriggerDescription": {
-          "Rotate": "Next sensor / adjust",
+          "Rotate": "Cycle sensors",
           "Push": "Reset min/max",
-          "Touch": "Switch view"
+          "Touch": "Next view",
+          "LongTouch": "Open AIDA64"
         }
       },
       "States": [

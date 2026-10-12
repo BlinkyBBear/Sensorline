@@ -5,7 +5,8 @@
 // 2. Shows the custom colour pickers only when Palette is "Custom".
 // 3. Status line (phase, active source: shared memory / WMI / registry) and
 //    validation messages sent by the plugin.
-// 4. "Preview warning colours", and settings export / import as JSON.
+// 4. "Preview warning colours", "Use recommended thresholds" (dial), the
+//    Sensor/Formula mode switch (dial), and settings export / import as JSON.
 //    Settings still save automatically on change (no Save button).
 (function () {
   "use strict";
@@ -64,6 +65,17 @@
     custom.hidden = palette.value !== "custom";
   }
 
+  // Sensor Dial: show the sensor or the formula fields for the chosen mode.
+  function syncMode() {
+    var mode = document.getElementById("mode");
+    if (!mode) return;
+    var formula = mode.value === "formula";
+    var a = document.getElementById("sensorMode");
+    var b = document.getElementById("formulaMode");
+    if (a) a.hidden = formula;
+    if (b) b.hidden = !formula;
+  }
+
   function client() {
     return window.SDPIComponents && window.SDPIComponents.streamDeckClient;
   }
@@ -100,6 +112,8 @@
     if (!c) return;
     var preview = document.getElementById("previewButton");
     if (preview) preview.addEventListener("click", function () { c.send("sendToPlugin", { event: "preview" }); });
+    var recommend = document.getElementById("recommendButton");
+    if (recommend) recommend.addEventListener("click", function () { c.send("sendToPlugin", { event: "recommend" }); });
     var box = document.getElementById("settingsJson");
     var exp = document.getElementById("exportButton");
     if (exp && box) {
@@ -147,9 +161,17 @@
       palette.addEventListener("valuechange", syncPalette);
       palette.addEventListener("change", syncPalette);
     }
+    var mode = document.getElementById("mode");
+    if (mode) {
+      mode.addEventListener("valuechange", syncMode);
+      mode.addEventListener("change", syncMode);
+    }
     var start = function () {
       watchAll();
       syncPalette();
+      syncMode();
+      setTimeout(syncMode, 300);
+      setTimeout(syncMode, 1200);
       // Settings arrive asynchronously; sync the palette once they have.
       setTimeout(syncPalette, 300);
       setTimeout(syncPalette, 1200);
