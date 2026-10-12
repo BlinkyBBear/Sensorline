@@ -73,7 +73,7 @@ describe("applyRecommendation", () => {
 describe("settings parsing", () => {
   it("defaults colours and sanitises bad values", () => {
     const g = parseGauge({ palette: "nope", gradient: "x", colCrit: "red", cold: "", warn: "80" });
-    expect(g).toMatchObject({ palette: "default", gradient: "smooth", colCrit: "#ff3b30", cold: null, warn: 80 });
+    expect(g).toMatchObject({ palette: "inherit", gradient: "inherit", colCrit: "#ff3b30", cold: null, warn: 80 });
   });
 });
 

@@ -6,3 +6,4 @@ coverage/
 com.rescuecraftstudio.sensorline.sdPlugin/bin/plugin.js
 com.rescuecraftstudio.sensorline.sdPlugin/bin/*.map
 com.rescuecraftstudio.sensorline.sdPlugin/logs/
+.cache/

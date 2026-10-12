@@ -15,6 +15,7 @@ export class SensorPoller {
   private running = false;
   private reading = false;
   private readonly listeners = new Set<() => void>();
+  private errorStreak = 0;
 
   constructor(private readonly log: Log, private readonly factory: () => SensorBackend = selectBackend) {
     this.backend = factory();
@@ -58,6 +59,8 @@ export class SensorPoller {
       const next = await this.backend.read();
       const changed = next.phase !== this.snapshot.phase || next.source !== this.snapshot.source;
       this.snapshot = next;
+      this.errorStreak = next.phase === "error" ? this.errorStreak + 1 : 0;
+      if (this.errorStreak >= ERRORS_BEFORE_RESTART) await this.recover();
       if (changed) this.log.info(`Sensors ${next.phase} via ${next.source}: ${next.detail}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -69,13 +72,39 @@ export class SensorPoller {
     }
   }
 
+  /** Restarts the backend (e.g. the PowerShell bridge) after repeated read errors. */
+  private async recover(): Promise<void> {
+    this.errorStreak = 0;
+    this.log.info(`Restarting the ${this.backend.id} backend after repeated errors`);
+    try {
+      await this.backend.stop();
+      await this.backend.start();
+    } catch (error) {
+      this.log.error(`Backend restart failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /** Interval for the next poll: the slow tier while AIDA64 is absent. */
+  currentInterval(): number {
+    return slowTier(this.snapshot.phase) ? Math.max(this.intervalMs, SLOW_INTERVAL) : this.intervalMs;
+  }
+
   private arm(): void {
     if (this.timer) clearTimeout(this.timer);
     if (!this.running) return;
     this.timer = setTimeout(() => {
       void this.readNow().finally(() => this.arm());
-    }, this.intervalMs);
+    }, this.currentInterval());
   }
+}
+
+/** Poll interval while AIDA64 is not running / not sharing. */
+export const SLOW_INTERVAL = 5000;
+export const ERRORS_BEFORE_RESTART = 3;
+
+/** Phases where AIDA64 is absent and polling slows down. */
+export function slowTier(phase: Snapshot["phase"]): boolean {
+  return phase === "not-running" || phase === "sharing-off" || phase === "backend-missing";
 }
 
 /** A signature of the sensor list (keys + phase). Changes only when sensors appear/disappear. */

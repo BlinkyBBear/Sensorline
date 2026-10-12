@@ -170,3 +170,49 @@ export function heat(value: number | null, z: Zones): number {
   if (end === start) return p >= end ? 1 : 0;
   return Math.min(1, Math.max(0, (p - start) / (end - start)));
 }
+
+export type Zone = "cold" | "normal" | "high" | "crit";
+
+/** Which zone a value falls in (the same boundaries as Stepped). Null for neutral sensors. */
+export function zoneOf(value: number | null, z: Zones): Zone | null {
+  if (value === null || !Number.isFinite(value)) return null;
+  const list = anchors(z);
+  if (!list) return null;
+  const ascending = list[3]!.value >= list[2]!.value;
+  const p = ascending ? value : -value;
+  const at = (i: number) => (ascending ? list[i]!.value : -list[i]!.value);
+  if (p >= at(3)) return "crit";
+  if (p >= at(2)) return "high";
+  if (ok(z.cold) && p < at(0)) return "cold";
+  return "normal";
+}
+
+/** WCAG 2.x relative luminance. */
+export function luminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex).map(toLinear) as RGB;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast ratio between two colours (1..21). */
+export function contrastRatio(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * Returns `fg`, lightened (or darkened) in OKLab until it reaches `min`
+ * contrast against `bg`. Hue is kept as far as possible.
+ */
+export function ensureContrast(fg: string, bg: string, min = 4.5): string {
+  if (contrastRatio(fg, bg) >= min) return fg;
+  const lighter = luminance(bg) < 0.18;
+  const [L, a, b] = rgbToOklab(hexToRgb(fg));
+  for (let step = 1; step <= 40; step += 1) {
+    const k = step / 40;
+    const nextL = lighter ? L + (1 - L) * k : L * (1 - k);
+    const candidate = rgbToHex(oklabToRgb([nextL, a * (1 - k), b * (1 - k)]));
+    if (contrastRatio(candidate, bg) >= min) return candidate;
+  }
+  return lighter ? "#ffffff" : "#000000";
+}

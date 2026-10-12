@@ -1,6 +1,6 @@
 {
   "name": "sensorline",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Stream Deck plugin that shows AIDA64 Extreme sensors.",
   "scripts": {
     "build": "node build.mjs",
@@ -9,7 +9,8 @@
     "lint": "tsc && node scripts/check-utf8.mjs",
     "test": "vitest run",
     "validate": "streamdeck validate com.rescuecraftstudio.sensorline.sdPlugin",
-    "pack": "npm run build && streamdeck pack com.rescuecraftstudio.sensorline.sdPlugin --output dist --force"
+    "pack": "npm run build && streamdeck pack com.rescuecraftstudio.sensorline.sdPlugin --output dist --force",
+    "assets": "esbuild scripts/make-assets.ts --bundle --platform=node --format=esm --packages=external --outfile=.cache/make-assets.mjs && node .cache/make-assets.mjs"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@elgato/cli": "^1.10.2",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^20.19.43",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
